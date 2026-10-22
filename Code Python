@@ -1,0 +1,73 @@
+import random
+
+def jouer_jeu_de_loie():
+    print("--- BIENVENUE DANS LE JEU DE L'OIE ---")
+    
+    # Configuration des joueurs
+    joueurs = ["Joueur 1", "Joueur 2"]
+    positions = {j: 0 for j in joueurs}
+    tours_passes = {j: 0 for j in joueurs}
+    
+    # Nombre total de cases
+    NB_CASES = 35
+    
+    # Cases spéciales (définition des effets)
+    # Les clés sont les cases, les valeurs sont les nouvelles positions (ou un message)
+    cases_speciales = {
+        6: ("Pont", 12),       # Avance à la case 12
+        10: ("Auberge", -2),   # Repose-toi, recule de 2
+        19: ("Puits", 0),      # Bloqué (géré via un compteur de tours)
+        25: ("Oie", 3),        # Rebondit de +3 cases
+        30: ("Prison", 0)      # Bloqué
+    }
+    
+    partie_terminee = False
+    
+    while not partie_terminee:
+        for joueur in joueurs:
+            print("\n" + "="*40)
+            print(f"C'est au tour de **{joueur}** (Position actuelle : {positions[joueur]})")
+            
+            # Vérifier si le joueur doit passer son tour
+            if tours_passes[joueur] > 0:
+                print(f"💤 {joueur} est bloqué(e) et passe son tour ({tours_passes[joueur]} tour(s) restant(s)).")
+                tours_passes[joueur] -= 1
+                continue
+            
+            input(f"Appuyez sur Entrée pour lancer le dé, {joueur}...")
+            de = random.randint(1, 6)
+            print(f"🎲 Vous avez fait : {de}")
+            
+            positions[joueur] += de
+            
+            # Gestion des rebonds si on dépasse la fin
+            if positions[joueur] > NB_CASES:
+                excedent = positions[joueur] - NB_CASES
+                positions[joueur] = NB_CASES - excedent
+                print(f"🔄 Oups ! Vous avez dépassé la fin. Vous reculez à la case {positions[joueur]}.")
+            else:
+                print(f"➡️ Vous arrivez sur la case {positions[joueur]}.")
+            
+            # Vérification des cases spéciales
+            if positions[joueur] in [19, 30]: # Puits ou Prison
+                nom_case = "Puits" if positions[joueur] == 19 else "Prison"
+                print(f"⚠️ Oh non ! Tombé(e) sur le **{nom_case}**. Vous passez 1 tour.")
+                tours_passes[joueur] = 1
+            elif positions[joueur] in cases_speciales:
+                nom, effet = cases_speciales[positions[joueur]]
+                if nom in ["Pont", "Oie"]:
+                    positions[joueur] += effet
+                    print(f"✨ Case **{nom}** ! Vous avancez directement à la case {positions[joueur]}.")
+                elif nom == "Auberge":
+                    positions[joueur] += effet
+                    print(f"🍺 Case **{nom}** ! Vous avez trop bu, vous reculez à la case {positions[joueur]}.")
+            
+            # Condition de victoire
+            if positions[joueur] == NB_CASES:
+                print(f"\n🎉 BRAVO ! **{joueur}** a gagné la partie en atteignant la case {NB_CASES} ! 🎉")
+                partie_terminee = True
+                break
+
+# Lancer le jeu
+if __name__ == "__main__":
+    jouer_jeu_de_loie()
